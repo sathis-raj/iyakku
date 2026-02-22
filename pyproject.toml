@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iyakku"
+version = "1.0.0"
+description = "Remote media controller - control your laptop's media from your phone"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    {name = "Sathis Raj"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia",
+]
+dependencies = [
+    "flask>=2.3,<3.1",
+    "flask-socketio>=5.3",
+    "qrcode[pil]>=7.4",
+    "pyautogui>=0.9.54",
+]
+
+[project.scripts]
+iyakku = "iyakku.launcher:main"
+
+[project.urls]
+Homepage = "https://github.com/sathisraj/iyakku"
+Repository = "https://github.com/sathisraj/iyakku"
+
+[project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["docs/*", "icons/*", "*.spec"]
+
+[tool.setuptools.package-data]
+iyakku = [
+    "templates/*.html",
+    "static/*.js",
+    "static/*.css",
+    "static/*.json",
+    "static/*.png",
+]

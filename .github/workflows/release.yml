@@ -1,0 +1,97 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            artifact_name: Iyakku-macOS-arm64
+          - os: macos-13
+            artifact_name: Iyakku-macOS-x86_64
+          - os: windows-latest
+            artifact_name: Iyakku-Windows-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Generate macOS icon
+        if: runner.os == 'macOS'
+        run: python -c "from PIL import Image; Image.open('src/iyakku/static/icon-512.png').save('icons/iyakku.icns')"
+
+      - name: Generate Windows icon
+        if: runner.os == 'Windows'
+        run: python -c "from PIL import Image; Image.open('src/iyakku/static/icon-512.png').save('icons/iyakku.ico', sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])"
+
+      - name: Build with PyInstaller
+        run: pyinstaller iyakku.spec
+
+      - name: Package macOS app
+        if: runner.os == 'macOS'
+        run: cd dist && zip -r ../${{ matrix.artifact_name }}.zip Iyakku.app
+
+      - name: Package Windows app
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path dist/Iyakku -DestinationPath ${{ matrix.artifact_name }}.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}.zip
+
+  pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build package
+        run: |
+          pip install build
+          python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build, pypi]
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Iyakku-macOS-arm64/Iyakku-macOS-arm64.zip
+            Iyakku-macOS-x86_64/Iyakku-macOS-x86_64.zip
+            Iyakku-Windows-x64/Iyakku-Windows-x64.zip
+          generate_release_notes: true

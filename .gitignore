@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# App config (user-specific)
+.iyakku_config.json
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Website (managed separately)
+docs/

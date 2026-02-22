@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f1a0f">
+    <title>Iyakku - Viewer</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+</head>
+<body class="viewer-body">
+    <!-- Welcome screen with QR code -->
+    <div id="welcome-screen" class="welcome-screen">
+        <img src="/static/icon-512.png" alt="Iyakku" class="app-logo">
+        <h1 class="app-title">Iyakku</h1>
+        <p class="app-subtitle">Remote Media Controller</p>
+        <div class="qr-container">
+            <img src="{{ qr_data }}" alt="QR Code" class="qr-code">
+        </div>
+        <p class="scan-text">Scan with your phone to connect</p>
+        <p class="cant-scan-toggle" id="cant-scan-toggle">Can't scan? Show URL</p>
+        <div class="url-row" id="url-row" style="display: none;">
+            <span class="controller-url" id="ctrl-url">{{ controller_url }}</span>
+            <span class="copy-btn" id="copy-btn">Copy</span>
+        </div>
+        <div class="pin-status">
+            <span class="pin-label" id="pin-label">
+                {% if pin_set %}&#128274; PIN Protected{% else %}&#128275; No PIN Set{% endif %}
+            </span>
+        </div>
+        <div class="status-row">
+            <span class="status-dot" id="status-dot"></span>
+            <span class="waiting-text">Waiting for controller...</span>
+        </div>
+        <p class="version-label">v{{ version }}</p>
+    </div>
+
+    <!-- Connected screen -->
+    <div id="connected-screen" class="connected-screen" style="display: none;">
+        <div class="connected-icon">&#128279;</div>
+        <h1 class="connected-title">Controller Connected</h1>
+        <p class="connected-subtitle">Browse folders on your phone to start</p>
+        <div class="connected-pulse-ring"></div>
+    </div>
+
+    <!-- Photo display -->
+    <div id="photo-container" class="photo-container" style="display: none;">
+        <img id="photo" class="photo" src="" alt="">
+        <div id="photo-info" class="photo-info"></div>
+    </div>
+
+    <!-- Video/Audio display -->
+    <div id="media-container" class="media-container" style="display: none;">
+        <video id="video-player" class="video-player"></video>
+        <div id="audio-display" class="audio-display" style="display: none;">
+            <div class="audio-icon">&#127925;</div>
+            <div id="audio-title" class="audio-title"></div>
+        </div>
+        <div id="media-info" class="photo-info"></div>
+    </div>
+
+    <!-- Mini player bar (laptop controls) -->
+    <div id="mini-player" class="mini-player" style="display: none;">
+        <button id="mp-prev" class="mp-btn">&#9198;</button>
+        <button id="mp-play" class="mp-btn mp-play-btn">&#9654;</button>
+        <button id="mp-next" class="mp-btn">&#9197;</button>
+        <span id="mp-time" class="mp-time">0:00</span>
+        <input id="mp-seek" class="mp-seek" type="range" min="0" max="100" step="0.1" value="0">
+        <span id="mp-duration" class="mp-time">0:00</span>
+        <span id="mp-title" class="mp-title"></span>
+        <button id="mp-mute" class="mp-btn mp-mute-btn">&#128266;</button>
+    </div>
+
+    <!-- Presenting overlay (shown behind native presentation app) -->
+    <div id="presenting-overlay" class="presenting-overlay" style="display: none;">
+        <div class="presenting-overlay-content">
+            <div class="presenting-overlay-icon">&#128196;</div>
+            <div id="presenting-file-name" class="presenting-file-name"></div>
+            <div class="presenting-status">Presenting</div>
+            <div class="presenting-pulse-ring"></div>
+        </div>
+    </div>
+
+    <!-- Click-to-play overlay (autoplay policy workaround) -->
+    <div id="play-overlay" class="play-overlay" style="display: none;">
+        <div class="play-overlay-content">
+            <div class="play-overlay-icon">&#9654;</div>
+            <div class="play-overlay-text">Click anywhere to enable playback</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="/static/viewer.js"></script>
+</body>
+</html>
