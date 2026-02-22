@@ -29,8 +29,8 @@ dependencies = [
 iyakku = "iyakku.launcher:main"
 
 [project.urls]
-Homepage = "https://github.com/sathisraj/iyakku"
-Repository = "https://github.com/sathisraj/iyakku"
+Homepage = "https://github.com/sathis-raj/iyakku"
+Repository = "https://github.com/sathis-raj/iyakku"
 
 [project.optional-dependencies]
 dev = [
