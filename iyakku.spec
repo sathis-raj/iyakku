@@ -72,8 +72,8 @@ if is_mac:
         info_plist={
             "CFBundleName": "Iyakku",
             "CFBundleDisplayName": "Iyakku",
-            "CFBundleShortVersionString": "1.0.1",
-            "CFBundleVersion": "1.0.1",
+            "CFBundleShortVersionString": "1.0.0",
+            "CFBundleVersion": "1.0.0",
             "NSHighResolutionCapable": True,
             "NSAppleEventsUsageDescription": "Iyakku needs permission to control presentations.",
             "NSAppleScriptEnabled": True,

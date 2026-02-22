@@ -111,6 +111,16 @@ Creates `dist/Iyakku.app` (macOS) or `dist/Iyakku/Iyakku.exe` (Windows).
 | Audio | MP3, WAV, M4A, AAC, FLAC, OGG, WMA |
 | Presentations | PPTX, PPT, PDF, KEY, ODP |
 
+## Uninstalling
+
+Deleting the app removes the application itself, but the PIN config file is stored separately at `~/.iyakku_config.json`. To fully remove all data:
+
+```bash
+rm ~/.iyakku_config.json
+```
+
+You can also reset the PIN without uninstalling — use the **Reset PIN** button in the launcher.
+
 ## Requirements
 
 - Python 3.9+ (only if installing via pip)

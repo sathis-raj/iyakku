@@ -475,24 +475,6 @@ body {
   background: #253525;
 }
 
-.parent-folder-item {
-  opacity: 0.7;
-  border: 1px dashed #2a3a2a;
-}
-
-.parent-folder-item .file-icon {
-  font-size: 18px;
-  color: #888;
-}
-
-.parent-folder-item .file-name {
-  color: #999;
-}
-
-.parent-folder-item .file-arrow {
-  color: #888;
-}
-
 .file-icon {
   font-size: 20px;
   flex-shrink: 0;

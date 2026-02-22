@@ -182,13 +182,14 @@ function renderBreadcrumbs(fullPath) {
   });
 }
 
-function createFolderItem(name, path, mediaCount, isRoot) {
+function createFolderItem(name, path, mediaCount, isRoot, capped) {
+  const countText = mediaCount > 0 ? `${mediaCount}${capped ? "+" : ""} media` : "";
   const el = document.createElement("div");
   el.className = "file-item folder-item";
   el.innerHTML = `
     <span class="file-icon">${isRoot ? "\uD83D\uDCBE" : "\uD83D\uDCC1"}</span>
     <span class="file-name">${name}</span>
-    ${mediaCount > 0 ? `<span class="image-count">${mediaCount} media</span>` : ""}
+    ${countText ? `<span class="image-count">${countText}</span>` : ""}
     <span class="file-arrow">\u203A</span>
   `;
   onTap(el, () => browseTo(path));
@@ -225,24 +226,6 @@ async function browseTo(path) {
 function renderFolderList(data) {
   folderList.innerHTML = "";
 
-  // Parent folder item (go up one level)
-  if (navHistory.length > 1) {
-    const parentPath = navHistory[navHistory.length - 2];
-    const parentEl = document.createElement("div");
-    parentEl.className = "file-item folder-item parent-folder-item";
-    parentEl.innerHTML = `
-      <span class="file-icon">&#8593;</span>
-      <span class="file-name">..</span>
-      <span class="file-arrow">&lsaquo;</span>
-    `;
-    onTap(parentEl, () => {
-      navHistory.pop();
-      const prev = navHistory.pop();
-      browseTo(prev);
-    });
-    folderList.appendChild(parentEl);
-  }
-
   const hasSubfolders = data.folders.length > 0;
   const allMedia = data.media || [];
   const mediaList = currentFilter === "all" ? allMedia : allMedia.filter((m) => m.type === currentFilter);
@@ -276,11 +259,11 @@ function renderFolderList(data) {
   // Folders — filter by type when a filter is active
   data.folders.forEach((f) => {
     if (currentFilter === "all") {
-      folderList.appendChild(createFolderItem(f.name, f.path, f.media_count, false));
+      folderList.appendChild(createFolderItem(f.name, f.path, f.media_count, false, f.capped));
     } else {
       const count = (f.type_counts && f.type_counts[currentFilter]) || 0;
       if (count > 0) {
-        folderList.appendChild(createFolderItem(f.name, f.path, count, false));
+        folderList.appendChild(createFolderItem(f.name, f.path, count, false, f.capped));
       }
     }
   });

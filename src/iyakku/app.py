@@ -254,19 +254,25 @@ def api_browse():
             if item.name.startswith("."):
                 continue
             if item.is_dir():
+                type_counts = {"image": 0, "video": 0, "audio": 0, "presentation": 0}
+                capped = False
                 try:
-                    type_counts = {"image": 0, "video": 0, "audio": 0, "presentation": 0}
-                    for f in item.iterdir():
-                        mt = get_media_type(f.name)
-                        if mt:
-                            type_counts[mt] += 1
-                    media_count = sum(type_counts.values())
+                    for root, dirs, files in os.walk(str(item)):
+                        dirs[:] = [d for d in dirs if not d.startswith(".") and d not in SKIP_DIRS]
+                        for f in files:
+                            mt = get_media_type(f)
+                            if mt:
+                                type_counts[mt] += 1
+                        if sum(type_counts.values()) >= 500:
+                            capped = True
+                            break
                 except PermissionError:
-                    media_count = 0
-                    type_counts = {"image": 0, "video": 0, "audio": 0, "presentation": 0}
+                    pass
+                media_count = sum(type_counts.values())
                 folders.append({
                     "name": item.name, "path": str(item),
                     "media_count": media_count, "type_counts": type_counts,
+                    "capped": capped,
                 })
             elif is_media(item.name):
                 stat = item.stat()
