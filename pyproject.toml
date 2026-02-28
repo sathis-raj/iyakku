@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iyakku"
-version = "1.0.2"
+version = "1.0.3"
 description = "Remote media controller - control your laptop's media from your phone"
 readme = "README.md"
 license = "MIT"
@@ -50,4 +50,5 @@ iyakku = [
     "static/*.css",
     "static/*.json",
     "static/*.png",
+    "static/*.html",
 ]
