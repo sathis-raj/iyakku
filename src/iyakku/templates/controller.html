@@ -11,8 +11,51 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="manifest" href="/static/manifest.json">
     <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <style>
+      body.controller-body{background:#0f1a0f}
+      #startup-offline{position:fixed;inset:0;z-index:99999;background:#0f1a0f;display:flex;align-items:center;justify-content:center;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+      #startup-offline .so-card{text-align:center;max-width:340px}
+      #startup-offline .so-icon{font-size:64px;margin-bottom:20px}
+      #startup-offline .so-title{font-size:22px;font-weight:700;color:#a0e650;margin-bottom:12px}
+      #startup-offline .so-msg{font-size:15px;color:#aaa;line-height:1.5;margin-bottom:28px}
+      #startup-offline .so-steps{text-align:left;font-size:14px;color:#999;line-height:1.8;margin-bottom:28px;padding-left:8px}
+      #startup-offline .so-steps li{margin-bottom:4px}
+      #startup-offline .so-btn{display:inline-block;background:#a0e650;color:#0f1a0f;border:none;border-radius:12px;padding:14px 36px;font-size:16px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+      #startup-offline .so-btn:active{opacity:0.8}
+    </style>
 </head>
 <body class="controller-body">
+    <!-- Offline fallback (inline, no external dependencies) -->
+    <div id="startup-offline">
+      <div class="so-card">
+        <div class="so-icon">&#128268;</div>
+        <div class="so-title">Can't reach Iyakku</div>
+        <div class="so-msg">The controller can't connect to the server on your laptop.</div>
+        <ol class="so-steps">
+          <li>Make sure Iyakku is running on your laptop</li>
+          <li>Connect your phone to the same WiFi network</li>
+          <li>Tap <strong>Retry</strong> to try again</li>
+        </ol>
+        <button class="so-btn" id="so-retry-btn" onclick="retryConnection()">Retry</button>
+        <div id="so-status" style="font-size:13px;color:#666;margin-top:16px;min-height:20px"></div>
+      </div>
+    </div>
+    <script>
+      function retryConnection() {
+        var btn = document.getElementById("so-retry-btn");
+        var status = document.getElementById("so-status");
+        btn.style.opacity = "0.5";
+        btn.disabled = true;
+        status.textContent = "Checking connection...";
+        fetch("/api/roots", { cache: "no-store" })
+          .then(function(r) { if (r.ok) location.reload(); else throw new Error(); })
+          .catch(function() {
+            status.textContent = "Still can't connect. Try again.";
+            btn.style.opacity = "1";
+            btn.disabled = false;
+          });
+      }
+    </script>
     <!-- Header -->
     <div class="ctrl-header">
         <button id="back-btn" class="ctrl-back-btn" style="display: none;">&#8592;</button>
@@ -323,7 +366,19 @@
     <script src="/static/controller.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/static/sw.js");
+        // Unregister any old service workers (e.g. from /static/sw.js)
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          regs.forEach(function(reg) {
+            if (reg.active && !reg.active.scriptURL.endsWith("/sw.js")) {
+              reg.unregister();
+            }
+            // Also unregister old ones with wrong scope
+            if (reg.scope && !reg.scope.endsWith(":" + location.port + "/")) {
+              reg.unregister();
+            }
+          });
+        });
+        navigator.serviceWorker.register("/sw.js");
       }
     </script>
 </body>

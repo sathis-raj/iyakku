@@ -1,4 +1,41 @@
-const socket = io();
+// Hide the inline startup-offline fallback (in case page loaded from cache)
+var startupOffline = document.getElementById("startup-offline");
+if (startupOffline) startupOffline.style.display = "none";
+
+const socket = io({ reconnectionAttempts: Infinity });
+
+// ─── Offline / Connection Lost Overlay ──────────────────────────────────────
+
+(function() {
+  let offlineOverlay = null;
+  function showOffline() {
+    if (offlineOverlay) return;
+    offlineOverlay = document.createElement("div");
+    offlineOverlay.id = "offline-overlay";
+    offlineOverlay.innerHTML =
+      '<div style="text-align:center;max-width:340px">' +
+        '<div style="font-size:64px;margin-bottom:20px">&#128268;</div>' +
+        '<div style="font-size:22px;font-weight:700;color:#a0e650;margin-bottom:12px">Can\'t reach Iyakku</div>' +
+        '<div style="font-size:15px;color:#aaa;line-height:1.5;margin-bottom:28px">The controller can\'t connect to the server on your laptop.</div>' +
+        '<ol style="text-align:left;font-size:14px;color:#999;line-height:1.8;margin-bottom:28px;padding-left:8px">' +
+          '<li>Make sure Iyakku is running on your laptop</li>' +
+          '<li>Connect your phone to the same WiFi network</li>' +
+          '<li>It will reconnect automatically</li>' +
+        '</ol>' +
+        '<div class="loading-spinner" style="margin:0 auto"></div>' +
+        '<div style="font-size:13px;color:#666;margin-top:16px;text-align:center">Trying to reconnect...</div>' +
+      '</div>';
+    offlineOverlay.style.cssText = "position:fixed;inset:0;z-index:10000;background:#0f1a0f;display:flex;align-items:center;justify-content:center;padding:24px";
+    document.body.appendChild(offlineOverlay);
+  }
+  function hideOffline() {
+    if (offlineOverlay) { offlineOverlay.remove(); offlineOverlay = null; }
+  }
+  socket.on("connect", hideOffline);
+  socket.on("connect_error", function() {
+    if (!socket.connected) showOffline();
+  });
+})();
 
 // ─── Tap Helper (fixes iOS Safari tap issues) ────────────────────────────────
 
@@ -139,9 +176,15 @@ function getMediaIcon(type) {
 // ─── Initialize ──────────────────────────────────────────────────────────────
 
 async function init() {
-  const res = await fetch("/api/roots");
-  const roots = await res.json();
-  renderRoots(roots);
+  loadingText.textContent = "Locating drives...";
+  loadingOverlay.style.display = "flex";
+  try {
+    const res = await fetch("/api/roots");
+    const roots = await res.json();
+    renderRoots(roots);
+  } finally {
+    loadingOverlay.style.display = "none";
+  }
 }
 
 function renderRoots(roots) {
@@ -198,6 +241,8 @@ function createFolderItem(name, path, mediaCount, isRoot, capped) {
 
 
 async function browseTo(path) {
+  loadingText.textContent = "Scanning folders...";
+  loadingOverlay.style.display = "flex";
   try {
     const res = await fetch(`/api/browse?path=${encodeURIComponent(path)}&sort=${currentSort}`);
     if (!res.ok) return;
@@ -220,6 +265,8 @@ async function browseTo(path) {
     renderFolderList(data);
   } catch (err) {
     console.error("Browse error:", err);
+  } finally {
+    loadingOverlay.style.display = "none";
   }
 }
 

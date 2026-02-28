@@ -10,7 +10,7 @@ import time
 import webbrowser
 from pathlib import Path
 
-from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, send_from_directory
 from flask_socketio import SocketIO, emit
 import random
 from PIL import Image, ExifTags
@@ -209,6 +209,12 @@ def get_media_type(filename):
 
 # ─── Routes ────────────────────────────────────────────────────────────────────
 
+@app.route("/sw.js")
+def service_worker():
+    return send_from_directory(app.static_folder, "sw.js",
+                               mimetype="application/javascript")
+
+
 @app.route("/")
 def index():
     return redirect(url_for("viewer"))
@@ -231,7 +237,11 @@ def viewer():
 
 @app.route("/controller")
 def controller():
-    return render_template("controller.html")
+    response = app.make_response(render_template("controller.html"))
+    # Cache the controller page in the browser so PWA cold-starts
+    # can serve it even if the service worker was evicted by iOS.
+    response.headers["Cache-Control"] = "max-age=300, stale-while-revalidate=86400"
+    return response
 
 
 @app.route("/api/roots")
